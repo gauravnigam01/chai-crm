@@ -14,7 +14,7 @@ const DEFAULT_ITEMS = [{ id: "tea", name: "Tea", price: 10, active: true }];
 const EMPTY_DATA = {
   // { id, name, price, active }
   items: DEFAULT_ITEMS,
-  // { id, name, phone, active }
+  // { id, name, phone, address, active }
   people: [],
   // { id, date: "YYYY-MM-DD", shift, personId, itemId, qty, price }
   // price is stored per entry so changing an item's price never changes old bills
@@ -75,8 +75,9 @@ export function StoreProvider({ children }) {
   }
 
   const actions = {
-    addPerson(name, phone = "") {
-      setData((d) => ({ ...d, people: [...d.people, { id: newId(), name: name.trim(), phone: phone.trim(), active: true }] }));
+    // details: { name, phone, address }
+    addPerson(details) {
+      setData((d) => ({ ...d, people: [...d.people, { id: newId(), phone: "", address: "", ...details, active: true }] }));
     },
     updatePerson: (id, changes) => update("people", id, changes),
     removePerson: (id) => removeOrHide("people", "personId", id),

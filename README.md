@@ -4,8 +4,8 @@ Simple tracker for a tea stall / office tea service: who got what (tea, coffee, 
 
 - **Entry** — pick the date, shift and item, then tap + / − next to each customer.
 - **Daily Report** — one day's sales by item and shift, plus who got what in each shift. Share on WhatsApp.
-- **Bills** — per-customer totals for this week, this month, last month or any date range, with item-wise quantities. Tap a customer for a day-wise bill and send it on WhatsApp.
-- **Customers** — add, edit or remove customers (with optional mobile number for WhatsApp).
+- **Bills** — totals for all customers for this week, this month, last month or any date range. Tap a customer to open their own bill (with mobile and address), then send it on WhatsApp or print it.
+- **Customers** — "+ Add customer" opens a form for name, mobile and office address. Every customer has a **Bill** button.
 - **Items** — add items with a price. Prices are stored on each entry, so changing a price never changes old bills.
 - **Settings** — backup download/restore.
 

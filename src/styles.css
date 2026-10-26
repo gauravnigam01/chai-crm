@@ -161,3 +161,39 @@ input:focus { outline: 2px solid var(--chai-soft); border-color: var(--chai); }
   .customer > .row { flex-wrap: wrap; }
   .customer > .row .row-actions { margin-left: auto; }
 }
+
+/* ---------- customer popup, customer bill ---------- */
+textarea {
+  font: inherit; padding: 0.6rem 0.75rem; border: 1px solid var(--line); border-radius: 10px;
+  background: #fff; width: 100%; resize: vertical;
+}
+textarea:focus { outline: 2px solid var(--chai-soft); border-color: var(--chai); }
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(42, 29, 20, 0.5); z-index: 20;
+  display: flex; align-items: flex-start; justify-content: center; padding: 3rem 1rem; overflow-y: auto;
+}
+.modal { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 0.8rem; }
+.modal h2 { margin: 0; }
+.modal label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.88rem; font-weight: 600; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+.btn.big { padding: 0.85rem; font-size: 1rem; }
+.address { white-space: pre-line; }
+.customer-card { align-items: flex-start; }
+.row-actions.stack { flex-direction: column; align-items: stretch; }
+.grow { flex: 1; }
+.button-row .btn.whatsapp { margin-top: 0; width: auto; }
+
+.bill-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.9rem; }
+.bill-head p { margin: 0.15rem 0; }
+.bill-head h2 { margin: 0.1rem 0 0.3rem; }
+.bill-label { letter-spacing: 0.15em; font-weight: 700; }
+.bill-range { text-align: right; }
+.day-table { margin-top: 1rem; }
+.day-table th:first-child, .day-table td:first-child { padding-left: 0; }
+.day-table th:last-child, .day-table td:last-child { padding-right: 0; }
+
+@media print {
+  .no-print { display: none !important; }
+  body, .app, .content { background: #fff; padding: 0; }
+  .card { border: none; }
+}

@@ -1,89 +1,68 @@
 import { useState } from "react";
 import { useStore } from "../store.jsx";
+import CustomerForm from "../components/CustomerForm.jsx";
 
-const cleanPhone = (value) => value.replace(/[^\d+ ]/g, "");
-
-export default function People() {
-  const { people, entries, addPerson, updatePerson, removePerson } = useStore();
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [editingId, setEditingId] = useState(null);
+export default function People({ openBill }) {
+  const { people, entries, updatePerson, removePerson } = useStore();
+  const [search, setSearch] = useState("");
+  // null = closed, "new" = add, or the person being edited
+  const [form, setForm] = useState(null);
   const [confirmId, setConfirmId] = useState(null);
 
-  function add(e) {
-    e.preventDefault();
-    if (!name.trim()) return;
-    addPerson(name, phone);
-    setName("");
-    setPhone("");
-  }
-
-  const active = people.filter((p) => p.active);
+  const term = search.trim().toLowerCase();
+  const active = people.filter(
+    (p) => p.active && [p.name, p.phone, p.address].some((v) => (v || "").toLowerCase().includes(term))
+  );
   const hidden = people.filter((p) => !p.active);
 
   return (
     <>
-      <form className="card add-person" onSubmit={add}>
-        <h2>Add a customer</h2>
-        <input placeholder="Name*" value={name} onChange={(e) => setName(e.target.value)} />
-        <input
-          placeholder="Mobile (optional, for sending bills on WhatsApp)"
-          inputMode="numeric"
-          value={phone}
-          onChange={(e) => setPhone(cleanPhone(e.target.value))}
-        />
-        <button className="btn primary">Add customer</button>
-      </form>
+      <button className="btn primary big" onClick={() => setForm("new")}>
+        + Add customer
+      </button>
+      <input className="search" placeholder="🔍 Search name, mobile or address…" value={search} onChange={(e) => setSearch(e.target.value)} />
 
       <div className="card list">
-        <h2 className="pad-h">Customers ({active.length})</h2>
-        {active.map((p) =>
-          editingId === p.id ? (
-            <EditRow
-              key={p.id}
-              person={p}
-              onSave={(changes) => {
-                updatePerson(p.id, changes);
-                setEditingId(null);
-              }}
-              onCancel={() => setEditingId(null)}
-            />
-          ) : (
-            <div key={p.id} className="row">
-              <div className="who">
-                <span className="name">{p.name}</span>
-                {p.phone && <span className="muted small">{p.phone}</span>}
-              </div>
-              {confirmId === p.id ? (
-                <div className="row-actions">
-                  <span className="small">Remove?</span>
-                  <button
-                    className="btn danger small-btn"
-                    onClick={() => {
-                      removePerson(p.id);
-                      setConfirmId(null);
-                    }}
-                  >
-                    Yes
-                  </button>
-                  <button className="btn small-btn" onClick={() => setConfirmId(null)}>
-                    No
-                  </button>
-                </div>
-              ) : (
-                <div className="row-actions">
-                  <button className="btn small-btn" onClick={() => setEditingId(p.id)}>
-                    Edit
-                  </button>
-                  <button className="btn small-btn" onClick={() => setConfirmId(p.id)}>
-                    Remove
-                  </button>
-                </div>
-              )}
+        <h2 className="pad-h">Customers ({people.filter((p) => p.active).length})</h2>
+        {active.map((p) => (
+          <div key={p.id} className="row customer-card">
+            <div className="who">
+              <span className="name">{p.name}</span>
+              {p.phone && <span className="small">📞 {p.phone}</span>}
+              {p.address && <span className="muted small address">📍 {p.address}</span>}
             </div>
-          )
-        )}
-        {active.length === 0 && <p className="muted pad">No customers yet.</p>}
+            {confirmId === p.id ? (
+              <div className="row-actions">
+                <span className="small">Remove?</span>
+                <button
+                  className="btn danger small-btn"
+                  onClick={() => {
+                    removePerson(p.id);
+                    setConfirmId(null);
+                  }}
+                >
+                  Yes
+                </button>
+                <button className="btn small-btn" onClick={() => setConfirmId(null)}>
+                  No
+                </button>
+              </div>
+            ) : (
+              <div className="row-actions stack">
+                <button className="btn primary small-btn" onClick={() => openBill(p.id)}>
+                  🧾 Bill
+                </button>
+                <button className="btn small-btn" onClick={() => setForm(p)}>
+                  Edit
+                </button>
+                <button className="btn small-btn" onClick={() => setConfirmId(p.id)}>
+                  Remove
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+        {active.length === 0 && <p className="muted pad">{term ? `No customer matches “${search}”.` : "No customers yet."}</p>}
       </div>
 
       {hidden.length > 0 && (
@@ -95,37 +74,20 @@ export default function People() {
               <span className="name muted">
                 {p.name} <span className="small">({entries.filter((e) => e.personId === p.id).length} entries)</span>
               </span>
-              <button className="btn small-btn" onClick={() => updatePerson(p.id, { active: true })}>
-                Restore
-              </button>
+              <div className="row-actions">
+                <button className="btn small-btn" onClick={() => openBill(p.id)}>
+                  Bill
+                </button>
+                <button className="btn small-btn" onClick={() => updatePerson(p.id, { active: true })}>
+                  Restore
+                </button>
+              </div>
             </div>
           ))}
         </div>
       )}
+
+      {form && <CustomerForm person={form === "new" ? null : form} onClose={() => setForm(null)} />}
     </>
-  );
-}
-
-function EditRow({ person, onSave, onCancel }) {
-  const [name, setName] = useState(person.name);
-  const [phone, setPhone] = useState(person.phone);
-
-  return (
-    <form
-      className="row edit"
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (name.trim()) onSave({ name: name.trim(), phone: phone.trim() });
-      }}
-    >
-      <input autoFocus value={name} onChange={(e) => setName(e.target.value)} />
-      <input placeholder="Mobile" value={phone} onChange={(e) => setPhone(cleanPhone(e.target.value))} />
-      <div className="row-actions">
-        <button className="btn primary small-btn">Save</button>
-        <button type="button" className="btn small-btn" onClick={onCancel}>
-          Cancel
-        </button>
-      </div>
-    </form>
   );
 }

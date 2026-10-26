@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { SHIFTS, currentShift, itemsText, rupees, summarize, today, useStore } from "../store.jsx";
+import CustomerForm from "../components/CustomerForm.jsx";
 
 function Counter({ qty, label, onChange }) {
   return (
@@ -16,12 +17,12 @@ function Counter({ qty, label, onChange }) {
 }
 
 export default function Entry({ goTo }) {
-  const { people, items, entries, setQty, addPerson, itemName } = useStore();
+  const { people, items, entries, setQty, itemName } = useStore();
   const [date, setDate] = useState(today);
   const [shift, setShift] = useState(currentShift);
   const [openId, setOpenId] = useState(null); // customer whose extra items are shown
   const [search, setSearch] = useState("");
-  const [newName, setNewName] = useState("");
+  const [showForm, setShowForm] = useState(false);
 
   // The first item (Tea by default) gets a counter right on each row; the rest are "extras"
   const activeItems = items.filter((i) => i.active);
@@ -37,13 +38,6 @@ export default function Entry({ goTo }) {
   const term = search.trim().toLowerCase();
   const activePeople = people.filter((p) => p.active);
   const visible = activePeople.filter((p) => p.name.toLowerCase().includes(term));
-
-  function quickAdd(e) {
-    e.preventDefault();
-    if (!newName.trim()) return;
-    addPerson(newName);
-    setNewName("");
-  }
 
   if (!mainItem) {
     return (
@@ -88,10 +82,9 @@ export default function Entry({ goTo }) {
       {activePeople.length === 0 ? (
         <div className="card empty">
           <p>No customers yet. Add the people you serve.</p>
-          <form className="inline-form" onSubmit={quickAdd}>
-            <input placeholder="Name (e.g. Sharma ji, Office 2)" value={newName} onChange={(e) => setNewName(e.target.value)} />
-            <button className="btn primary">Add</button>
-          </form>
+          <button className="btn primary" onClick={() => setShowForm(true)}>
+            + Add customer
+          </button>
         </div>
       ) : (
         <>
@@ -161,15 +154,16 @@ export default function Entry({ goTo }) {
             })}
             {visible.length === 0 && <p className="muted pad">No customer named “{search}”.</p>}
           </div>
-          <form className="inline-form" onSubmit={quickAdd}>
-            <input placeholder="Add a new customer…" value={newName} onChange={(e) => setNewName(e.target.value)} />
-            <button className="btn">+ Add</button>
-          </form>
+          <button className="btn" onClick={() => setShowForm(true)}>
+            + Add customer
+          </button>
           <p className="muted small center">
             Tap + for {mainItem.name}. Tap “+ Extra” to add other items for that customer. Entries save automatically.
           </p>
         </>
       )}
+
+      {showForm && <CustomerForm onClose={() => setShowForm(false)} />}
     </>
   );
 }
