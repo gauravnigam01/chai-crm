@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { SHIFTS, formatDate, groupBy, itemsText, rupees, shiftDate, summarize, today, useStore } from "../store.jsx";
+import ItemPic from "../components/ItemPic.jsx";
 
 export default function DailyReport() {
-  const { people, entries, payments, itemName } = useStore();
+  const { people, entries, payments, itemName, itemIcon, itemLabel } = useStore();
   const [date, setDate] = useState(today);
 
   const dayEntries = entries.filter((e) => e.date === date);
@@ -23,7 +24,7 @@ export default function DailyReport() {
   const message = [
     `📅 Daily report — ${formatDate(date, true)}`,
     "",
-    ...[...day.byItem.entries()].map(([id, t]) => `${itemName(id)}: ${t.qty} — ${rupees(t.amount)}`),
+    ...[...day.byItem.entries()].map(([id, t]) => `${itemLabel(id)}: ${t.qty} — ${rupees(t.amount)}`),
     "",
     ...SHIFTS.map((s) => `${s.label}: ${rupees(day[s.key])}`),
     "",
@@ -99,7 +100,12 @@ export default function DailyReport() {
               <tbody>
                 {[...day.byItem.entries()].map(([id, t]) => (
                   <tr key={id}>
-                    <td>{itemName(id)}</td>
+                    <td>
+                      <span className="item-cell">
+                        <ItemPic icon={itemIcon(id)} size="sm" />
+                        {itemName(id)}
+                      </span>
+                    </td>
                     {SHIFTS.map((s) => (
                       <td key={s.key} className="num">
                         {t.qtyByShift[s.key] || "–"}
@@ -137,7 +143,7 @@ export default function DailyReport() {
                   <div key={r.personId} className="row">
                     <div className="who">
                       <span className="name">{personName(r.personId)}</span>
-                      <span className="muted small">{itemsText(r, itemName)}</span>
+                      <span className="muted small">{itemsText(r, itemLabel)}</span>
                     </div>
                     <strong>{rupees(r.amount)}</strong>
                   </div>

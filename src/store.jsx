@@ -11,8 +11,47 @@ export const SHIFTS = [
 
 const DEFAULT_ITEMS = [{ id: "tea", name: "Tea", price: 10, active: true }];
 
+// Small pictures for items; picked in the Items page or guessed from the name
+export const ITEM_ICONS = [
+  "🍵", "☕", "🧃", "🍋", "🥛", "💧", "🥤", "🍪", "🥟", "🥪", "🍰",
+  "🍞", "🍜", "🧆", "🥚", "🍟", "🫓", "🍛", "🍦", "🍌", "🍎", "🍽️",
+];
+
+const ICON_GUESSES = [
+  [/cof|kof|kaapi/, "☕"],
+  [/tea|chai|chay/, "🍵"],
+  [/juice|jus/, "🧃"],
+  [/lemon|nimbu|shikanji/, "🍋"],
+  [/milk|doodh|dudh|lassi|chaas|shake/, "🥛"],
+  [/water|pani|bisleri/, "💧"],
+  [/cold|coke|pepsi|sprite|soda|drink|thums/, "🥤"],
+  [/biscuit|biskit|cookie|rusk|toast/, "🍪"],
+  [/samosa|momo|kachori/, "🥟"],
+  [/sandwich|burger/, "🥪"],
+  [/cake|pastry|muffin/, "🍰"],
+  [/bread|bun|pav/, "🍞"],
+  [/maggi|noodle/, "🍜"],
+  [/pakod|pakor|bhaji|vada|wada/, "🧆"],
+  [/egg|anda|omelet/, "🥚"],
+  [/chips|fries|namkeen/, "🍟"],
+  [/paratha|roti|chapati/, "🫓"],
+  [/poha|upma|rice|chawal|thali/, "🍛"],
+  [/ice ?cream|kulfi/, "🍦"],
+  [/banana|kela/, "🍌"],
+  [/apple|fruit/, "🍎"],
+];
+
+export function guessIcon(name = "") {
+  const n = name.toLowerCase();
+  return ICON_GUESSES.find(([re]) => re.test(n))?.[1] || "🍽️";
+}
+
+export function iconOf(item) {
+  return item.icon || guessIcon(item.name);
+}
+
 const EMPTY_DATA = {
-  // { id, name, price, active }
+  // { id, name, price, icon, active } — icon is optional, see iconOf()
   items: DEFAULT_ITEMS,
   // { id, name, phone, address, active }
   people: [],
@@ -86,8 +125,8 @@ export function StoreProvider({ children }) {
     updatePerson: (id, changes) => update("people", id, changes),
     removePerson: (id) => removeOrHide("people", "personId", id),
 
-    addItem(name, price) {
-      setData((d) => ({ ...d, items: [...d.items, { id: newId(), name: name.trim(), price, active: true }] }));
+    addItem(name, price, icon) {
+      setData((d) => ({ ...d, items: [...d.items, { id: newId(), name: name.trim(), price, icon, active: true }] }));
     },
     updateItem: (id, changes) => update("items", id, changes),
     removeItem: (id) => removeOrHide("items", "itemId", id),
@@ -132,9 +171,20 @@ export function StoreProvider({ children }) {
   const value = {
     ...data,
     ...actions,
-    itemName: (key) =>
-      isCustomKey(key) ? key.slice(CUSTOM_PREFIX.length) : data.items.find((i) => i.id === key)?.name || "Item",
+    itemName,
+    itemIcon,
+    // "🍵 Tea"
+    itemLabel: (key) => `${itemIcon(key)} ${itemName(key)}`,
   };
+
+  function itemName(key) {
+    return isCustomKey(key) ? key.slice(CUSTOM_PREFIX.length) : data.items.find((i) => i.id === key)?.name || "Item";
+  }
+
+  function itemIcon(key) {
+    const item = isCustomKey(key) ? null : data.items.find((i) => i.id === key);
+    return item ? iconOf(item) : guessIcon(itemName(key));
+  }
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

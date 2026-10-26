@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { SHIFTS, accountOf, currentShift, itemsText, rupees, summarize, today, useStore } from "../store.jsx";
+import { SHIFTS, accountOf, currentShift, guessIcon, iconOf, itemsText, rupees, summarize, today, useStore } from "../store.jsx";
 import CustomerForm from "../components/CustomerForm.jsx";
+import ItemPic from "../components/ItemPic.jsx";
 import ReceivePayment from "../components/ReceivePayment.jsx";
 import Balance from "../components/Balance.jsx";
 
@@ -73,7 +74,7 @@ function CustomAdd({ onAdd }) {
 }
 
 export default function Entry({ goTo }) {
-  const { people, items, entries, payments, setQty, addCustom, removeEntry, itemName } = useStore();
+  const { people, items, entries, payments, setQty, addCustom, removeEntry, itemLabel } = useStore();
   const [receiving, setReceiving] = useState(null);
   const [date, setDate] = useState(today);
   const [shift, setShift] = useState(currentShift);
@@ -154,7 +155,7 @@ export default function Entry({ goTo }) {
                     <span className="who">
                       <span className="name">{p.name}</span>
                       <span className="muted small">
-                        {ps.qty > 0 ? `${itemsText(ps, itemName)} · ${rupees(ps.amount)}` : "Nothing yet"}
+                        {ps.qty > 0 ? `${itemsText(ps, itemLabel)} · ${rupees(ps.amount)}` : "Nothing yet"}
                       </span>
                     </span>
                     <span className={ps.qty ? "btn extra-btn filled" : "btn extra-btn"}>
@@ -172,7 +173,8 @@ export default function Entry({ goTo }) {
                       </div>
                       {activeItems.map((i) => (
                         <div key={i.id} className={qtyFor(p.id, i.id) ? "extra-row picked" : "extra-row"}>
-                          <span>
+                          <span className="item-name">
+                            <ItemPic icon={iconOf(i)} />
                             {i.name} <span className="muted small">{rupees(i.price)}</span>
                           </span>
                           <Counter
@@ -186,7 +188,8 @@ export default function Entry({ goTo }) {
                         .filter((e) => e.personId === p.id && !e.itemId)
                         .map((e) => (
                           <div key={e.id} className="extra-row picked">
-                            <span>
+                            <span className="item-name">
+                              <ItemPic icon={guessIcon(e.name)} />
                               {e.name} × {e.qty}
                             </span>
                             <span className="row-actions">

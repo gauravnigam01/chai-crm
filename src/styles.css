@@ -281,3 +281,24 @@ textarea:focus { outline: 2px solid var(--chai-soft); border-color: var(--chai);
 .payments summary { cursor: pointer; font-weight: 600; color: var(--chai); }
 .payment-row { display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; padding: 0.45rem 0; border-bottom: 1px dashed var(--line); }
 .picker.two { grid-template-columns: 1fr 1fr; }
+
+/* ---------- item pictures ---------- */
+.item-pic {
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  width: 40px; height: 40px; border-radius: 12px; font-size: 1.35rem; line-height: 1;
+  background: var(--chai-soft); border: 1px solid var(--line);
+}
+.item-pic.sm { width: 28px; height: 28px; border-radius: 8px; font-size: 1rem; }
+.item-name, .item-cell { display: inline-flex; align-items: center; gap: 0.6rem; }
+.item-cell { gap: 0.45rem; }
+.field-label { font-weight: 600; margin-bottom: -0.3rem; }
+.icon-picker { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.icon-choice {
+  width: 42px; height: 42px; border-radius: 10px; border: 1px solid var(--line); background: #fff;
+  font-size: 1.3rem; cursor: pointer; display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.icon-choice.auto { width: auto; padding: 0 0.6rem; flex-direction: row; gap: 0.3rem; font-size: 1.1rem; }
+.icon-choice.auto span { font-size: 0.78rem; font-weight: 600; }
+.icon-choice.active { border-color: var(--chai); background: var(--chai-soft); box-shadow: 0 0 0 2px var(--chai) inset; }
+.row.edit .icon-picker { flex-basis: 100%; }
+.who.grow { flex: 1; }

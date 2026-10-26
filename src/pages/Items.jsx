@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { rupees, useStore } from "../store.jsx";
+import { iconOf, rupees, useStore } from "../store.jsx";
+import ItemPic, { IconPicker } from "../components/ItemPic.jsx";
 
 function parsePrice(value) {
   const price = Number(value);
@@ -10,6 +11,7 @@ export default function Items() {
   const { items, entries, addItem, updateItem, removeItem } = useStore();
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
+  const [icon, setIcon] = useState(null);
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [confirmId, setConfirmId] = useState(null);
@@ -21,9 +23,10 @@ export default function Items() {
       setError("Enter an item name and a price above 0.");
       return;
     }
-    addItem(name, p);
+    addItem(name, p, icon || undefined);
     setName("");
     setPrice("");
+    setIcon(null);
     setError("");
   }
 
@@ -46,6 +49,8 @@ export default function Items() {
             onChange={(e) => setPrice(e.target.value)}
           />
         </div>
+        <span className="small field-label">Picture</span>
+        <IconPicker value={icon} name={name} onChange={setIcon} />
         {error && <p className="error small">{error}</p>}
         <button className="btn primary">Add item</button>
       </form>
@@ -66,7 +71,8 @@ export default function Items() {
             />
           ) : (
             <div key={i.id} className="row">
-              <div className="who">
+              <ItemPic icon={iconOf(i)} />
+              <div className="who grow">
                 <span className="name">{i.name}</span>
                 <span className="muted small">{rupees(i.price)} each</span>
               </div>
@@ -109,7 +115,7 @@ export default function Items() {
           {hidden.map((i) => (
             <div key={i.id} className="row">
               <span className="name muted">
-                {i.name} <span className="small">({entries.filter((e) => e.itemId === i.id).length} entries)</span>
+                {iconOf(i)} {i.name} <span className="small">({entries.filter((e) => e.itemId === i.id).length} entries)</span>
               </span>
               <button className="btn small-btn" onClick={() => updateItem(i.id, { active: true })}>
                 Restore
@@ -125,6 +131,7 @@ export default function Items() {
 function EditItem({ item, onSave, onCancel }) {
   const [name, setName] = useState(item.name);
   const [price, setPrice] = useState(String(item.price));
+  const [icon, setIcon] = useState(item.icon || null);
   const valid = name.trim() && parsePrice(price);
 
   return (
@@ -132,11 +139,12 @@ function EditItem({ item, onSave, onCancel }) {
       className="row edit"
       onSubmit={(e) => {
         e.preventDefault();
-        if (valid) onSave({ name: name.trim(), price: parsePrice(price) });
+        if (valid) onSave({ name: name.trim(), price: parsePrice(price), icon: icon || undefined });
       }}
     >
       <input autoFocus value={name} onChange={(e) => setName(e.target.value)} />
       <input className="price-input" type="number" min="0.5" step="0.5" value={price} onChange={(e) => setPrice(e.target.value)} />
+      <IconPicker value={icon} name={name} onChange={setIcon} />
       <div className="row-actions">
         <button className="btn primary small-btn" disabled={!valid}>
           Save

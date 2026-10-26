@@ -6,7 +6,7 @@ import Balance from "../components/Balance.jsx";
 
 // One customer's own bill for a date range, plus their all-time account
 export default function CustomerBill({ personId, initialRange, onBack }) {
-  const { people, entries, payments, removePayment, itemName } = useStore();
+  const { people, entries, payments, removePayment, itemName, itemLabel } = useStore();
   const [range, setRange] = useState(initialRange || defaultRange);
   const [receiving, setReceiving] = useState(false);
   const [confirmPaymentId, setConfirmPaymentId] = useState(null);
@@ -43,7 +43,7 @@ export default function CustomerBill({ personId, initialRange, onBack }) {
     `🧾 Bill — ${person.name}`,
     rangeLabel,
     "",
-    ...[...total.byItem.entries()].map(([id, t]) => `${itemName(id)}: ${t.qty} — ${rupees(t.amount)}`),
+    ...[...total.byItem.entries()].map(([id, t]) => `${itemLabel(id)}: ${t.qty} — ${rupees(t.amount)}`),
     "",
     `Total: ${rupees(total.amount)}`,
     "",
@@ -140,7 +140,7 @@ export default function CustomerBill({ personId, initialRange, onBack }) {
               {[...total.byItem.entries()].map(([id, t]) => (
                 <li key={id}>
                   <span>
-                    {itemName(id)} × {t.qty}
+                    {itemLabel(id)} × {t.qty}
                   </span>
                   <span>{rupees(t.amount)}</span>
                 </li>
@@ -171,7 +171,7 @@ export default function CustomerBill({ personId, initialRange, onBack }) {
                 {days.map((d) => (
                   <tr key={d.date}>
                     <td>{formatDate(d.date)}</td>
-                    <td className="wrap">{itemsText(d, itemName)}</td>
+                    <td className="wrap">{itemsText(d, itemLabel)}</td>
                     <td className="num">{rupees(d.amount)}</td>
                   </tr>
                 ))}

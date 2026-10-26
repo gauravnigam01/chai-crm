@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { accountOf, groupBy, isCustomKey, rupees, summarize, useStore } from "../store.jsx";
+import { accountOf, groupBy, iconOf, isCustomKey, rupees, summarize, useStore } from "../store.jsx";
 import RangePicker, { defaultRange } from "../components/RangePicker.jsx";
 import Balance from "../components/Balance.jsx";
 
@@ -58,7 +58,7 @@ export default function Bills({ openBill }) {
               <th>Customer</th>
               {itemColumns.map((i) => (
                 <th key={i.id} className="num">
-                  {i.name}
+                  {iconOf(i)} {i.name}
                 </th>
               ))}
               {showOther && <th className="num">Other</th>}
