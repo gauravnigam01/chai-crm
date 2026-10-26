@@ -1,0 +1,11 @@
+services:
+  # Static site: all data is stored in the visitor's browser, so nothing is lost on redeploy
+  - type: web
+    name: chai-hisaab
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
