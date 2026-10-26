@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useStore } from "../store.jsx";
 
+const cleanPhone = (value) => value.replace(/[^\d+ ]/g, "");
+
 export default function People() {
   const { people, entries, addPerson, updatePerson, removePerson } = useStore();
   const [name, setName] = useState("");
@@ -22,19 +24,19 @@ export default function People() {
   return (
     <>
       <form className="card add-person" onSubmit={add}>
-        <h2>Naya naam jodo</h2>
-        <input placeholder="Naam*" value={name} onChange={(e) => setName(e.target.value)} />
+        <h2>Add a customer</h2>
+        <input placeholder="Name*" value={name} onChange={(e) => setName(e.target.value)} />
         <input
-          placeholder="Mobile (WhatsApp bill ke liye, optional)"
+          placeholder="Mobile (optional, for sending bills on WhatsApp)"
           inputMode="numeric"
           value={phone}
-          onChange={(e) => setPhone(e.target.value.replace(/[^\d+ ]/g, ""))}
+          onChange={(e) => setPhone(cleanPhone(e.target.value))}
         />
-        <button className="btn primary">Jodo</button>
+        <button className="btn primary">Add customer</button>
       </form>
 
       <div className="card list">
-        <h2 className="pad-h">Sab log ({active.length})</h2>
+        <h2 className="pad-h">Customers ({active.length})</h2>
         {active.map((p) =>
           editingId === p.id ? (
             <EditRow
@@ -48,13 +50,13 @@ export default function People() {
             />
           ) : (
             <div key={p.id} className="row">
-              <div>
+              <div className="who">
                 <span className="name">{p.name}</span>
-                {p.phone && <div className="muted small">{p.phone}</div>}
+                {p.phone && <span className="muted small">{p.phone}</span>}
               </div>
               {confirmId === p.id ? (
                 <div className="row-actions">
-                  <span className="small">Hatayein?</span>
+                  <span className="small">Remove?</span>
                   <button
                     className="btn danger small-btn"
                     onClick={() => {
@@ -62,40 +64,39 @@ export default function People() {
                       setConfirmId(null);
                     }}
                   >
-                    Haan
+                    Yes
                   </button>
                   <button className="btn small-btn" onClick={() => setConfirmId(null)}>
-                    Nahi
+                    No
                   </button>
                 </div>
               ) : (
                 <div className="row-actions">
                   <button className="btn small-btn" onClick={() => setEditingId(p.id)}>
-                    Badlo
+                    Edit
                   </button>
                   <button className="btn small-btn" onClick={() => setConfirmId(p.id)}>
-                    Hatao
+                    Remove
                   </button>
                 </div>
               )}
             </div>
           )
         )}
-        {active.length === 0 && <p className="muted pad">Abhi koi naam nahi hai.</p>}
+        {active.length === 0 && <p className="muted pad">No customers yet.</p>}
       </div>
 
       {hidden.length > 0 && (
         <div className="card list">
-          <h2 className="pad-h">Hataye gaye log</h2>
-          <p className="muted small pad-h">Inka purana hisaab Hisaab page par dikhta rahega.</p>
+          <h2 className="pad-h">Removed customers</h2>
+          <p className="muted small pad-h">Their old entries still show in reports and bills.</p>
           {hidden.map((p) => (
             <div key={p.id} className="row">
               <span className="name muted">
-                {p.name}{" "}
-                <span className="small">({entries.filter((e) => e.personId === p.id).length} entries)</span>
+                {p.name} <span className="small">({entries.filter((e) => e.personId === p.id).length} entries)</span>
               </span>
               <button className="btn small-btn" onClick={() => updatePerson(p.id, { active: true })}>
-                Wapas lao
+                Restore
               </button>
             </div>
           ))}
@@ -118,7 +119,7 @@ function EditRow({ person, onSave, onCancel }) {
       }}
     >
       <input autoFocus value={name} onChange={(e) => setName(e.target.value)} />
-      <input placeholder="Mobile" value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^\d+ ]/g, ""))} />
+      <input placeholder="Mobile" value={phone} onChange={(e) => setPhone(cleanPhone(e.target.value))} />
       <div className="row-actions">
         <button className="btn primary small-btn">Save</button>
         <button type="button" className="btn small-btn" onClick={onCancel}>

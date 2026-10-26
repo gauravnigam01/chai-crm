@@ -1,13 +1,17 @@
-# Chai Hisaab
+# Chai Tracker
 
-Simple tea-delivery tracker: who got how many cups of chai in the morning (Subah), afternoon (Dopahar) and evening (Shaam), and how much each person owes.
+Simple tracker for a tea stall / office tea service: who got what (tea, coffee, snacks…) in the morning, afternoon and evening, and how much each customer owes.
 
-- **Chai likho** — pick the date and shift, tap + / − next to each name.
-- **Hisaab** — totals per person for today, this week, this month, last month or any date range, split by shift, with the grand total bill. Tap a name for a day-wise bill and send it on WhatsApp.
-- **Log** — add, rename, or remove people (people with past entries are hidden, not deleted, so old bills stay correct).
-- **Settings** — chai rate (stored per entry, so changing the rate never changes old bills), backup download/restore.
+- **Entry** — pick the date, shift and item, then tap + / − next to each customer.
+- **Daily Report** — one day's sales by item and shift, plus who got what in each shift. Share on WhatsApp.
+- **Bills** — per-customer totals for this week, this month, last month or any date range, with item-wise quantities. Tap a customer for a day-wise bill and send it on WhatsApp.
+- **Customers** — add, edit or remove customers (with optional mobile number for WhatsApp).
+- **Items** — add items with a price. Prices are stored on each entry, so changing a price never changes old bills.
+- **Settings** — backup download/restore.
 
-All data is saved in the browser (localStorage) on the device where it is entered. There is no server, so take a backup from Settings regularly.
+Customers and items that already have entries are hidden instead of deleted, so old reports stay correct.
+
+All data is saved in the browser (localStorage) on the device where it is entered. There is no server, so take a backup from Settings regularly. Data from the first version (tea only) is migrated automatically.
 
 ## Run locally
 

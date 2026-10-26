@@ -1,33 +1,21 @@
 import { useRef, useState } from "react";
-import { isValidData, rupees, today, useStore } from "../store.jsx";
+import { migrate, today, useStore } from "../store.jsx";
 
 export default function Settings() {
-  const { price, people, entries, setPrice, replaceAll } = useStore();
-  const [priceInput, setPriceInput] = useState(String(price));
+  const { items, people, entries, replaceAll } = useStore();
   const [message, setMessage] = useState("");
   const [confirmClear, setConfirmClear] = useState(false);
   const fileRef = useRef(null);
 
-  function savePrice(e) {
-    e.preventDefault();
-    const value = Number(priceInput);
-    if (!(value > 0)) {
-      setMessage("Sahi rate daalo (0 se zyada).");
-      return;
-    }
-    setPrice(value);
-    setMessage(`Rate ${rupees(value)} ho gaya. Ye aage ki chai par lagega, purane bill nahi badlenge.`);
-  }
-
   function downloadBackup() {
-    const blob = new Blob([JSON.stringify({ price, people, entries }, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify({ items, people, entries }, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `chai-hisaab-backup-${today()}.json`;
+    a.download = `chai-tracker-backup-${today()}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    setMessage("Backup file download ho gayi. Ise sambhal kar rakho.");
+    setMessage("Backup downloaded. Keep the file somewhere safe.");
   }
 
   async function restoreBackup(e) {
@@ -35,13 +23,12 @@ export default function Settings() {
     e.target.value = "";
     if (!file) return;
     try {
-      const data = JSON.parse(await file.text());
-      if (!isValidData(data)) throw new Error("bad file");
+      const data = migrate(JSON.parse(await file.text()));
+      if (!data) throw new Error("bad file");
       replaceAll(data);
-      setPriceInput(String(data.price));
-      setMessage(`Backup wapas aa gaya: ${data.people.length} log, ${data.entries.length} entries.`);
+      setMessage(`Backup restored: ${data.people.length} customers, ${data.items.length} items, ${data.entries.length} entries.`);
     } catch {
-      setMessage("Ye sahi backup file nahi hai.");
+      setMessage("That is not a valid backup file.");
     }
   }
 
@@ -49,57 +36,48 @@ export default function Settings() {
     <>
       {message && <p className="notice">{message}</p>}
 
-      <form className="card settings" onSubmit={savePrice}>
-        <h2>Ek chai ka rate</h2>
-        <div className="inline-form">
-          <span className="prefix">₹</span>
-          <input type="number" min="1" step="0.5" value={priceInput} onChange={(e) => setPriceInput(e.target.value)} />
-          <button className="btn primary">Save</button>
-        </div>
-      </form>
-
       <div className="card settings">
         <h2>Backup</h2>
         <p className="muted small">
-          Saara hisaab isi phone/computer ke browser mein save hai. Hafte mein ek baar backup download kar lo, taaki phone
-          badalne ya browser saaf karne par data na jaaye.
+          All data is saved in this browser on this device only. Download a backup every week so nothing is lost if you
+          change phones or clear the browser.
         </p>
         <p className="small">
-          Abhi: {people.length} log, {entries.length} entries
+          Now: {people.length} customers, {items.length} items, {entries.length} entries
         </p>
         <div className="button-row">
           <button className="btn primary" onClick={downloadBackup}>
-            Backup download karo
+            Download backup
           </button>
           <button className="btn" onClick={() => fileRef.current.click()}>
-            Backup se wapas lao
+            Restore from backup
           </button>
           <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={restoreBackup} />
         </div>
       </div>
 
       <div className="card settings">
-        <h2>Sab mitao</h2>
-        <p className="muted small">Saare naam aur saara hisaab hamesha ke liye mit jayega.</p>
+        <h2>Delete everything</h2>
+        <p className="muted small">Permanently deletes all customers and entries. Items are kept.</p>
         {confirmClear ? (
           <div className="button-row">
             <button
               className="btn danger"
               onClick={() => {
-                replaceAll({ price, people: [], entries: [] });
+                replaceAll({ items, people: [], entries: [] });
                 setConfirmClear(false);
-                setMessage("Sab mita diya.");
+                setMessage("All customers and entries deleted.");
               }}
             >
-              Haan, sab mitao
+              Yes, delete everything
             </button>
             <button className="btn" onClick={() => setConfirmClear(false)}>
-              Nahi
+              Cancel
             </button>
           </div>
         ) : (
           <button className="btn danger" onClick={() => setConfirmClear(true)}>
-            Sab mitao…
+            Delete everything…
           </button>
         )}
       </div>

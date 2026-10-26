@@ -63,8 +63,8 @@ input:focus { outline: 2px solid var(--chai-soft); border-color: var(--chai); }
 .controls { display: flex; flex-direction: column; gap: 0.8rem; }
 .controls label, .range label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.85rem; font-weight: 600; }
 .range { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
-.shift-picker { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
-.shift-picker.wrap { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+.picker { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+.picker.wrap { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
 .pill {
   font: inherit; font-weight: 600; padding: 0.65rem 0.5rem; border-radius: 999px; cursor: pointer;
   border: 1px solid var(--line); background: #fff; color: var(--ink);
@@ -124,3 +124,21 @@ input:focus { outline: 2px solid var(--chai-soft); border-color: var(--chai); }
   padding-top: 0.8rem; border-top: 1px dashed var(--line);
 }
 .bill-total strong { font-size: 1.7rem; color: var(--chai-dark); }
+
+/* ---------- items, daily report, bills ---------- */
+.picker.items { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+.pill.item { border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 0.1rem; }
+.pill-price { font-size: 0.78rem; font-weight: 500; opacity: 0.8; }
+.who { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.error { color: var(--red); margin: 0; }
+.price-input { flex: 0 0 110px; }
+.date-nav { display: flex; gap: 0.5rem; align-items: center; padding: 0.7rem; }
+.date-nav input { flex: 1; }
+.btn:disabled { opacity: 0.4; cursor: default; }
+.page-title { margin: 0; font-size: 1.15rem; }
+.list-head { display: flex; justify-content: space-between; align-items: baseline; padding: 0 1rem 0.6rem; }
+.list-head h2 { margin: 0; }
+.card.list > .list-head + .row { border-top: 1px solid var(--line); }
+.bill-items { list-style: none; margin: 0 0 0.9rem; padding: 0; }
+.bill-items li { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px dashed var(--line); }
+.table td.wrap { white-space: normal; min-width: 160px; }

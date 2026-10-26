@@ -1,26 +1,43 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-const STORAGE_KEY = "chai_hisaab_v1";
+const STORAGE_KEY = "chai_tracker_v2";
+const OLD_STORAGE_KEY = "chai_hisaab_v1";
 
 export const SHIFTS = [
-  { key: "morning", label: "Subah" },
-  { key: "afternoon", label: "Dopahar" },
-  { key: "evening", label: "Shaam" },
+  { key: "morning", label: "Morning" },
+  { key: "afternoon", label: "Afternoon" },
+  { key: "evening", label: "Evening" },
 ];
 
+const DEFAULT_ITEMS = [{ id: "tea", name: "Tea", price: 10, active: true }];
+
 const EMPTY_DATA = {
-  price: 10,
+  // { id, name, price, active }
+  items: DEFAULT_ITEMS,
   // { id, name, phone, active }
   people: [],
-  // { id, date: "YYYY-MM-DD", shift, personId, cups, price }
-  // price is stored per entry so changing the chai price never changes old bills
+  // { id, date: "YYYY-MM-DD", shift, personId, itemId, qty, price }
+  // price is stored per entry so changing an item's price never changes old bills
   entries: [],
 };
 
+// v1 had a single chai price and entries with `cups`; turn that into a "Tea" item
+export function migrate(raw) {
+  if (!raw || !Array.isArray(raw.people) || !Array.isArray(raw.entries)) return null;
+  if (Array.isArray(raw.items)) return { ...EMPTY_DATA, ...raw };
+
+  const tea = { ...DEFAULT_ITEMS[0], price: typeof raw.price === "number" ? raw.price : 10 };
+  return {
+    items: [tea],
+    people: raw.people,
+    entries: raw.entries.map(({ cups, ...e }) => ({ ...e, itemId: tea.id, qty: cups })),
+  };
+}
+
 function load() {
   try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    return saved ? { ...EMPTY_DATA, ...saved } : EMPTY_DATA;
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || localStorage.getItem(OLD_STORAGE_KEY));
+    return migrate(saved) || EMPTY_DATA;
   } catch {
     return EMPTY_DATA;
   }
@@ -28,15 +45,6 @@ function load() {
 
 function newId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-}
-
-export function isValidData(data) {
-  return (
-    data &&
-    typeof data.price === "number" &&
-    Array.isArray(data.people) &&
-    Array.isArray(data.entries)
-  );
 }
 
 const StoreContext = createContext(null);
@@ -52,41 +60,42 @@ export function StoreProvider({ children }) {
     }
   }, [data]);
 
+  // Hidden (not deleted) when they have entries, so old bills stay correct
+  function removeOrHide(listKey, refKey, id) {
+    setData((d) => ({
+      ...d,
+      [listKey]: d.entries.some((e) => e[refKey] === id)
+        ? d[listKey].map((x) => (x.id === id ? { ...x, active: false } : x))
+        : d[listKey].filter((x) => x.id !== id),
+    }));
+  }
+
+  function update(listKey, id, changes) {
+    setData((d) => ({ ...d, [listKey]: d[listKey].map((x) => (x.id === id ? { ...x, ...changes } : x)) }));
+  }
+
   const actions = {
-    setPrice(price) {
-      setData((d) => ({ ...d, price }));
-    },
-
     addPerson(name, phone = "") {
-      const person = { id: newId(), name: name.trim(), phone: phone.trim(), active: true };
-      setData((d) => ({ ...d, people: [...d.people, person] }));
-      return person;
+      setData((d) => ({ ...d, people: [...d.people, { id: newId(), name: name.trim(), phone: phone.trim(), active: true }] }));
     },
+    updatePerson: (id, changes) => update("people", id, changes),
+    removePerson: (id) => removeOrHide("people", "personId", id),
 
-    updatePerson(id, changes) {
-      setData((d) => ({ ...d, people: d.people.map((p) => (p.id === id ? { ...p, ...changes } : p)) }));
+    addItem(name, price) {
+      setData((d) => ({ ...d, items: [...d.items, { id: newId(), name: name.trim(), price, active: true }] }));
     },
+    updateItem: (id, changes) => update("items", id, changes),
+    removeItem: (id) => removeOrHide("items", "itemId", id),
 
-    // People with entries are only hidden, so their old bills stay correct
-    removePerson(id) {
-      setData((d) =>
-        d.entries.some((e) => e.personId === id)
-          ? { ...d, people: d.people.map((p) => (p.id === id ? { ...p, active: false } : p)) }
-          : { ...d, people: d.people.filter((p) => p.id !== id) }
-      );
-    },
-
-    // One entry per person per shift per day; setting cups to 0 removes it
-    setCups(date, shift, personId, cups) {
+    // One entry per person, item, shift and day; qty 0 removes it
+    setQty(date, shift, personId, itemId, qty) {
       setData((d) => {
-        const existing = d.entries.find((e) => e.date === date && e.shift === shift && e.personId === personId);
-        if (cups <= 0) {
-          return existing ? { ...d, entries: d.entries.filter((e) => e !== existing) } : d;
-        }
-        if (existing) {
-          return { ...d, entries: d.entries.map((e) => (e === existing ? { ...e, cups } : e)) };
-        }
-        return { ...d, entries: [...d.entries, { id: newId(), date, shift, personId, cups, price: d.price }] };
+        const match = (e) => e.date === date && e.shift === shift && e.personId === personId && e.itemId === itemId;
+        const existing = d.entries.find(match);
+        if (qty <= 0) return existing ? { ...d, entries: d.entries.filter((e) => e !== existing) } : d;
+        if (existing) return { ...d, entries: d.entries.map((e) => (e === existing ? { ...e, qty } : e)) };
+        const price = d.items.find((i) => i.id === itemId)?.price || 0;
+        return { ...d, entries: [...d.entries, { id: newId(), date, shift, personId, itemId, qty, price }] };
       });
     },
 
@@ -95,11 +104,58 @@ export function StoreProvider({ children }) {
     },
   };
 
-  return <StoreContext.Provider value={{ ...data, ...actions }}>{children}</StoreContext.Provider>;
+  const value = {
+    ...data,
+    ...actions,
+    itemName: (id) => data.items.find((i) => i.id === id)?.name || "Item",
+  };
+
+  return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
 
 export function useStore() {
   return useContext(StoreContext);
+}
+
+// ---------- totals ----------
+
+function emptyTotals() {
+  return { qty: 0, amount: 0, morning: 0, afternoon: 0, evening: 0 };
+}
+
+function add(totals, e) {
+  const amount = e.qty * e.price;
+  totals.qty += e.qty;
+  totals.amount += amount;
+  totals[e.shift] += amount;
+}
+
+// Totals overall, per item and per shift for a list of entries
+export function summarize(entries) {
+  const total = emptyTotals();
+  const byItem = new Map();
+  for (const e of entries) {
+    add(total, e);
+    if (!byItem.has(e.itemId)) byItem.set(e.itemId, { ...emptyTotals(), qtyByShift: { morning: 0, afternoon: 0, evening: 0 } });
+    const item = byItem.get(e.itemId);
+    add(item, e);
+    item.qtyByShift[e.shift] += e.qty;
+  }
+  return { ...total, byItem };
+}
+
+export function groupBy(entries, key) {
+  const map = new Map();
+  for (const e of entries) {
+    if (!map.has(e[key])) map.set(e[key], []);
+    map.get(e[key]).push(e);
+  }
+  return map;
+}
+
+// "Tea × 2, Biscuit × 1"
+export function itemsText(summary, itemName) {
+  return [...summary.byItem.entries()].map(([id, t]) => `${itemName(id)} × ${t.qty}`).join(", ");
 }
 
 // ---------- date helpers (all local time) ----------
@@ -112,6 +168,12 @@ export function today() {
   return toDateKey(new Date());
 }
 
+export function shiftDate(dateKey, days) {
+  const d = new Date(dateKey + "T00:00:00");
+  d.setDate(d.getDate() + days);
+  return toDateKey(d);
+}
+
 export function currentShift() {
   const hour = new Date().getHours();
   if (hour < 12) return "morning";
@@ -119,8 +181,9 @@ export function currentShift() {
   return "evening";
 }
 
-export function formatDate(dateKey) {
+export function formatDate(dateKey, withWeekday = false) {
   return new Date(dateKey + "T00:00:00").toLocaleDateString("en-IN", {
+    weekday: withWeekday ? "short" : undefined,
     day: "2-digit",
     month: "short",
     year: "numeric",

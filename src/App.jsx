@@ -1,13 +1,17 @@
 import { useState } from "react";
 import Entry from "./pages/Entry.jsx";
-import Report from "./pages/Report.jsx";
+import DailyReport from "./pages/DailyReport.jsx";
+import Bills from "./pages/Bills.jsx";
 import People from "./pages/People.jsx";
+import Items from "./pages/Items.jsx";
 import Settings from "./pages/Settings.jsx";
 
 const TABS = [
-  { key: "entry", label: "☕ Chai likho", Page: Entry },
-  { key: "report", label: "📒 Hisaab", Page: Report },
-  { key: "people", label: "👥 Log", Page: People },
+  { key: "entry", label: "☕ Entry", Page: Entry },
+  { key: "daily", label: "📅 Daily Report", Page: DailyReport },
+  { key: "bills", label: "🧾 Bills", Page: Bills },
+  { key: "people", label: "👥 Customers", Page: People },
+  { key: "items", label: "🍪 Items", Page: Items },
   { key: "settings", label: "⚙️ Settings", Page: Settings },
 ];
 
@@ -18,7 +22,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <h1>☕ Chai Hisaab</h1>
+        <h1>☕ Chai Tracker</h1>
       </header>
       <nav className="tabs">
         {TABS.map((t) => (
