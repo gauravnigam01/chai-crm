@@ -142,3 +142,22 @@ input:focus { outline: 2px solid var(--chai-soft); border-color: var(--chai); }
 .bill-items { list-style: none; margin: 0 0 0.9rem; padding: 0; }
 .bill-items li { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px dashed var(--line); }
 .table td.wrap { white-space: normal; min-width: 160px; }
+
+/* ---------- entry: per-customer extras ---------- */
+.list-columns { display: flex; justify-content: space-between; padding: 0 1.4rem 0.5rem 1rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.customer { border-top: 1px solid var(--line); }
+.customer > .row { border-top: none; }
+.customer.has { background: var(--chai-soft); }
+.customer.open { background: var(--chai-soft); box-shadow: inset 4px 0 0 var(--chai); }
+.extra-btn { padding: 0.45rem 0.7rem; font-size: 0.85rem; border-color: var(--chai); color: var(--chai); }
+.extra-btn.filled { background: var(--chai); color: #fff; }
+.extras { padding: 0 1rem 0.8rem 1.6rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.extra-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 0.8rem;
+  background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 0.4rem 0.5rem 0.4rem 0.8rem;
+}
+.extra-row .counter button { width: 38px; height: 38px; font-size: 1.2rem; }
+@media (max-width: 420px) {
+  .customer > .row { flex-wrap: wrap; }
+  .customer > .row .row-actions { margin-left: auto; }
+}
