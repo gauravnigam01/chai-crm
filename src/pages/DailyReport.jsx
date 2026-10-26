@@ -2,11 +2,13 @@ import { useState } from "react";
 import { SHIFTS, formatDate, groupBy, itemsText, rupees, shiftDate, summarize, today, useStore } from "../store.jsx";
 
 export default function DailyReport() {
-  const { people, entries, itemName } = useStore();
+  const { people, entries, payments, itemName } = useStore();
   const [date, setDate] = useState(today);
 
   const dayEntries = entries.filter((e) => e.date === date);
   const day = summarize(dayEntries);
+  const dayPayments = payments.filter((p) => p.date === date);
+  const received = dayPayments.reduce((sum, p) => sum + p.amount, 0);
   const customerCount = new Set(dayEntries.map((e) => e.personId)).size;
   const personName = (id) => people.find((p) => p.id === id)?.name || "Unknown";
 
@@ -27,6 +29,7 @@ export default function DailyReport() {
     "",
     `Total: ${day.qty} items — ${rupees(day.amount)}`,
     `Customers: ${customerCount}`,
+    `Payments received: ${rupees(received)}`,
   ].join("\n");
 
   return (
@@ -48,14 +51,32 @@ export default function DailyReport() {
           <strong>{rupees(day.amount)}</strong>
         </div>
         <div>
-          <span>Items</span>
-          <strong>{day.qty}</strong>
+          <span>Received</span>
+          <strong>{rupees(received)}</strong>
         </div>
         <div>
           <span>Customers</span>
           <strong>{customerCount}</strong>
         </div>
       </div>
+
+      {dayPayments.length > 0 && (
+        <div className="card list">
+          <div className="list-head">
+            <h2>💰 Payments received</h2>
+            <strong>{rupees(received)}</strong>
+          </div>
+          {dayPayments.map((p) => (
+            <div key={p.id} className="row">
+              <div className="who">
+                <span className="name">{personName(p.personId)}</span>
+                <span className="muted small">{p.mode}</span>
+              </div>
+              <strong>{rupees(p.amount)}</strong>
+            </div>
+          ))}
+        </div>
+      )}
 
       {dayEntries.length === 0 ? (
         <p className="card muted center">Nothing recorded on this day.</p>

@@ -221,3 +221,17 @@ textarea:focus { outline: 2px solid var(--chai-soft); border-color: var(--chai);
   width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: #fff;
   color: var(--red); cursor: pointer; font-size: 0.85rem;
 }
+
+/* ---------- payments & balance ---------- */
+.balance { display: inline-block; font-size: 0.8rem; font-weight: 700; padding: 0.15rem 0.55rem; border-radius: 999px; white-space: nowrap; }
+.balance.due { background: #fdecea; color: var(--red); }
+.balance.advance { background: #e7f6ec; color: var(--green); }
+.balance.settled { background: #eef0f2; color: var(--muted); }
+.who .balance { align-self: flex-start; margin-top: 0.2rem; }
+.account-head { display: flex; justify-content: space-between; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; flex-wrap: wrap; }
+.account-head p { margin: 0 0 0.3rem; }
+.account-line { display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.payments { margin-top: 0.8rem; }
+.payments summary { cursor: pointer; font-weight: 600; color: var(--chai); }
+.payment-row { display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; padding: 0.45rem 0; border-bottom: 1px dashed var(--line); }
+.picker.two { grid-template-columns: 1fr 1fr; }

@@ -7,6 +7,7 @@ Simple tracker for a tea stall / office tea service: who got what (tea, coffee, 
 - **Bills** — totals for all customers for this week, this month, last month or any date range. Tap a customer to open their own bill (with mobile and address), then send it on WhatsApp or print it.
 - **Customers** — "+ Add customer" opens a form for name, mobile and office address. Every customer has a **Bill** button.
 - **Items** — add items with a price. Prices are stored on each entry, so changing a price never changes old bills.
+- **Payments** — "💰 Receive" (in Entry, Customers and each bill) records cash/UPI received. Each customer shows their all-time balance: **Due** (they owe you), **Advance** (they paid extra, you owe them) or **Settled**. Bills shows the total still to collect; the Daily Report shows payments received that day.
 - **Settings** — backup download/restore.
 
 Customers and items that already have entries are hidden instead of deleted, so old reports stay correct.

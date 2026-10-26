@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { groupBy, isCustomKey, rupees, summarize, useStore } from "../store.jsx";
+import { accountOf, groupBy, isCustomKey, rupees, summarize, useStore } from "../store.jsx";
 import RangePicker, { defaultRange } from "../components/RangePicker.jsx";
+import Balance from "../components/Balance.jsx";
 
 export default function Bills({ openBill }) {
-  const { people, items, entries } = useStore();
+  const { people, items, entries, payments } = useStore();
+  // Money still to collect from everyone, all time (advances don't reduce other people's dues)
+  const toCollect = people.reduce((sum, p) => sum + Math.max(0, accountOf(p.id, entries, payments).balance), 0);
   const [range, setRange] = useState(defaultRange);
   const { from, to } = range;
 
@@ -37,8 +40,8 @@ export default function Bills({ openBill }) {
           <strong>{grand.qty}</strong>
         </div>
         <div>
-          <span>Customers</span>
-          <strong>{rows.length}</strong>
+          <span>To collect (all time)</span>
+          <strong>{rupees(toCollect)}</strong>
         </div>
       </div>
 
@@ -54,6 +57,7 @@ export default function Bills({ openBill }) {
               ))}
               {showOther && <th className="num">Other</th>}
               <th className="num">Bill</th>
+              <th>Balance</th>
               <th />
             </tr>
           </thead>
@@ -70,6 +74,9 @@ export default function Bills({ openBill }) {
                 <td className="num">
                   <strong>{rupees(r.amount)}</strong>
                 </td>
+                <td>
+                  <Balance balance={accountOf(r.person.id, entries, payments).balance} />
+                </td>
                 <td className="num">
                   <span className="link">View bill →</span>
                 </td>
@@ -77,7 +84,7 @@ export default function Bills({ openBill }) {
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={itemColumns.length + (showOther ? 4 : 3)} className="muted">
+                <td colSpan={itemColumns.length + (showOther ? 5 : 4)} className="muted">
                   Nothing recorded in this period.
                 </td>
               </tr>
@@ -94,6 +101,7 @@ export default function Bills({ openBill }) {
                 ))}
                 {showOther && <td className="num">{rupees(otherAmount(grand))}</td>}
                 <td className="num">{rupees(grand.amount)}</td>
+                <td />
                 <td />
               </tr>
             </tfoot>

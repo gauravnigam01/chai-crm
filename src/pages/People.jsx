@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { useStore } from "../store.jsx";
+import { accountOf, useStore } from "../store.jsx";
 import CustomerForm from "../components/CustomerForm.jsx";
+import ReceivePayment from "../components/ReceivePayment.jsx";
+import Balance from "../components/Balance.jsx";
 
 export default function People({ openBill }) {
-  const { people, entries, updatePerson, removePerson } = useStore();
+  const { people, entries, payments, updatePerson, removePerson } = useStore();
+  const [receiving, setReceiving] = useState(null);
   const [search, setSearch] = useState("");
   // null = closed, "new" = add, or the person being edited
   const [form, setForm] = useState(null);
@@ -30,6 +33,7 @@ export default function People({ openBill }) {
               <span className="name">{p.name}</span>
               {p.phone && <span className="small">📞 {p.phone}</span>}
               {p.address && <span className="muted small address">📍 {p.address}</span>}
+              <Balance balance={accountOf(p.id, entries, payments).balance} />
             </div>
             {confirmId === p.id ? (
               <div className="row-actions">
@@ -51,6 +55,9 @@ export default function People({ openBill }) {
               <div className="row-actions stack">
                 <button className="btn primary small-btn" onClick={() => openBill(p.id)}>
                   🧾 Bill
+                </button>
+                <button className="btn small-btn" onClick={() => setReceiving(p)}>
+                  💰 Receive
                 </button>
                 <button className="btn small-btn" onClick={() => setForm(p)}>
                   Edit
@@ -88,6 +95,7 @@ export default function People({ openBill }) {
       )}
 
       {form && <CustomerForm person={form === "new" ? null : form} onClose={() => setForm(null)} />}
+      {receiving && <ReceivePayment person={receiving} onClose={() => setReceiving(null)} />}
     </>
   );
 }

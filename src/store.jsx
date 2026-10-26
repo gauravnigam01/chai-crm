@@ -20,6 +20,8 @@ const EMPTY_DATA = {
   // or a one-off typed-in item: { id, date, shift, personId, itemId: null, name, qty, amount }
   // price is stored per entry so changing an item's price never changes old bills
   entries: [],
+  // money received from customers: { id, personId, date, amount, mode: "Cash" | "UPI" }
+  payments: [],
 };
 
 // v1 had a single chai price and entries with `cups`; turn that into a "Tea" item
@@ -29,6 +31,7 @@ export function migrate(raw) {
 
   const tea = { ...DEFAULT_ITEMS[0], price: typeof raw.price === "number" ? raw.price : 10 };
   return {
+    ...EMPTY_DATA,
     items: [tea],
     people: raw.people,
     entries: raw.entries.map(({ cups, ...e }) => ({ ...e, itemId: tea.id, qty: cups })),
@@ -113,6 +116,14 @@ export function StoreProvider({ children }) {
       setData((d) => ({ ...d, entries: d.entries.filter((e) => e.id !== id) }));
     },
 
+    addPayment(personId, amount, date, mode) {
+      setData((d) => ({ ...d, payments: [...d.payments, { id: newId(), personId, date, amount, mode }] }));
+    },
+
+    removePayment(id) {
+      setData((d) => ({ ...d, payments: d.payments.filter((p) => p.id !== id) }));
+    },
+
     replaceAll(newData) {
       setData({ ...EMPTY_DATA, ...newData });
     },
@@ -173,6 +184,13 @@ export function summarize(entries) {
     item.qtyByShift[e.shift] += e.qty;
   }
   return { ...total, byItem };
+}
+
+// All-time account of one customer. balance > 0: they owe us; balance < 0: they paid in advance.
+export function accountOf(personId, entries, payments) {
+  const billed = entries.filter((e) => e.personId === personId).reduce((sum, e) => sum + entryAmount(e), 0);
+  const received = payments.filter((p) => p.personId === personId).reduce((sum, p) => sum + p.amount, 0);
+  return { billed, received, balance: billed - received };
 }
 
 export function groupBy(entries, key) {

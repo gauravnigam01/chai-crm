@@ -2,13 +2,13 @@ import { useRef, useState } from "react";
 import { migrate, today, useStore } from "../store.jsx";
 
 export default function Settings() {
-  const { items, people, entries, replaceAll } = useStore();
+  const { items, people, entries, payments, replaceAll } = useStore();
   const [message, setMessage] = useState("");
   const [confirmClear, setConfirmClear] = useState(false);
   const fileRef = useRef(null);
 
   function downloadBackup() {
-    const blob = new Blob([JSON.stringify({ items, people, entries }, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify({ items, people, entries, payments }, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -26,7 +26,7 @@ export default function Settings() {
       const data = migrate(JSON.parse(await file.text()));
       if (!data) throw new Error("bad file");
       replaceAll(data);
-      setMessage(`Backup restored: ${data.people.length} customers, ${data.items.length} items, ${data.entries.length} entries.`);
+      setMessage(`Backup restored: ${data.people.length} customers, ${data.items.length} items, ${data.entries.length} entries, ${data.payments.length} payments.`);
     } catch {
       setMessage("That is not a valid backup file.");
     }
@@ -43,7 +43,7 @@ export default function Settings() {
           change phones or clear the browser.
         </p>
         <p className="small">
-          Now: {people.length} customers, {items.length} items, {entries.length} entries
+          Now: {people.length} customers, {items.length} items, {entries.length} entries, {payments.length} payments
         </p>
         <div className="button-row">
           <button className="btn primary" onClick={downloadBackup}>
@@ -58,15 +58,15 @@ export default function Settings() {
 
       <div className="card settings">
         <h2>Delete everything</h2>
-        <p className="muted small">Permanently deletes all customers and entries. Items are kept.</p>
+        <p className="muted small">Permanently deletes all customers, entries and payments. Items are kept.</p>
         {confirmClear ? (
           <div className="button-row">
             <button
               className="btn danger"
               onClick={() => {
-                replaceAll({ items, people: [], entries: [] });
+                replaceAll({ items, people: [], entries: [], payments: [] });
                 setConfirmClear(false);
-                setMessage("All customers and entries deleted.");
+                setMessage("All customers, entries and payments deleted.");
               }}
             >
               Yes, delete everything

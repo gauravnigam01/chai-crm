@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { SHIFTS, currentShift, itemsText, rupees, summarize, today, useStore } from "../store.jsx";
+import { SHIFTS, accountOf, currentShift, itemsText, rupees, summarize, today, useStore } from "../store.jsx";
 import CustomerForm from "../components/CustomerForm.jsx";
+import ReceivePayment from "../components/ReceivePayment.jsx";
+import Balance from "../components/Balance.jsx";
 
 function Counter({ qty, label, onChange }) {
   return (
@@ -71,7 +73,8 @@ function CustomAdd({ onAdd }) {
 }
 
 export default function Entry({ goTo }) {
-  const { people, items, entries, setQty, addCustom, removeEntry, itemName } = useStore();
+  const { people, items, entries, payments, setQty, addCustom, removeEntry, itemName } = useStore();
+  const [receiving, setReceiving] = useState(null);
   const [date, setDate] = useState(today);
   const [shift, setShift] = useState(currentShift);
   const [openId, setOpenId] = useState(null); // customer whose items are shown
@@ -161,6 +164,12 @@ export default function Entry({ goTo }) {
 
                   {open && (
                     <div className="extras">
+                      <div className="account-line">
+                        <Balance balance={accountOf(p.id, entries, payments).balance} />
+                        <button className="btn small-btn" onClick={() => setReceiving(p)}>
+                          💰 Receive payment
+                        </button>
+                      </div>
                       {activeItems.map((i) => (
                         <div key={i.id} className={qtyFor(p.id, i.id) ? "extra-row picked" : "extra-row"}>
                           <span>
@@ -206,6 +215,7 @@ export default function Entry({ goTo }) {
       )}
 
       {showForm && <CustomerForm onClose={() => setShowForm(false)} />}
+      {receiving && <ReceivePayment person={receiving} onClose={() => setReceiving(null)} />}
     </>
   );
 }
