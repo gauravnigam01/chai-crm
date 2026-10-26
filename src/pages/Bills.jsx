@@ -14,9 +14,15 @@ export default function Bills({ openBill }) {
   const grand = summarize(inRange);
   const byPerson = groupBy(inRange, "personId");
 
+  // Money received in the same period
+  const paidInRange = payments.filter((p) => p.date >= from && p.date <= to);
+  const receivedBy = groupBy(paidInRange, "personId");
+  const sumAmount = (list = []) => list.reduce((sum, p) => sum + p.amount, 0);
+  const totalReceived = sumAmount(paidInRange);
+
   const rows = people
-    .filter((p) => byPerson.has(p.id))
-    .map((p) => ({ person: p, ...summarize(byPerson.get(p.id)) }))
+    .filter((p) => byPerson.has(p.id) || receivedBy.has(p.id))
+    .map((p) => ({ person: p, ...summarize(byPerson.get(p.id) || []), received: sumAmount(receivedBy.get(p.id)) }))
     .sort((a, b) => b.amount - a.amount);
 
   // Only show columns for items sold in this period, in the Items-page order
@@ -36,8 +42,8 @@ export default function Bills({ openBill }) {
           <strong>{rupees(grand.amount)}</strong>
         </div>
         <div>
-          <span>Items</span>
-          <strong>{grand.qty}</strong>
+          <span>Total received</span>
+          <strong>{rupees(totalReceived)}</strong>
         </div>
         <div>
           <span>To collect (all time)</span>
@@ -57,6 +63,7 @@ export default function Bills({ openBill }) {
               ))}
               {showOther && <th className="num">Other</th>}
               <th className="num">Bill</th>
+              <th className="num">Received</th>
               <th>Balance</th>
               <th />
             </tr>
@@ -74,6 +81,7 @@ export default function Bills({ openBill }) {
                 <td className="num">
                   <strong>{rupees(r.amount)}</strong>
                 </td>
+                <td className="num">{r.received ? rupees(r.received) : "–"}</td>
                 <td>
                   <Balance balance={accountOf(r.person.id, entries, payments).balance} />
                 </td>
@@ -84,7 +92,7 @@ export default function Bills({ openBill }) {
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={itemColumns.length + (showOther ? 5 : 4)} className="muted">
+                <td colSpan={itemColumns.length + (showOther ? 6 : 5)} className="muted">
                   Nothing recorded in this period.
                 </td>
               </tr>
@@ -101,6 +109,7 @@ export default function Bills({ openBill }) {
                 ))}
                 {showOther && <td className="num">{rupees(otherAmount(grand))}</td>}
                 <td className="num">{rupees(grand.amount)}</td>
+                <td className="num">{rupees(totalReceived)}</td>
                 <td />
                 <td />
               </tr>
