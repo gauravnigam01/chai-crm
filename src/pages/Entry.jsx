@@ -20,13 +20,11 @@ export default function Entry({ goTo }) {
   const { people, items, entries, setQty, itemName } = useStore();
   const [date, setDate] = useState(today);
   const [shift, setShift] = useState(currentShift);
-  const [openId, setOpenId] = useState(null); // customer whose extra items are shown
+  const [openId, setOpenId] = useState(null); // customer whose items are shown
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
 
-  // The first item (Tea by default) gets a counter right on each row; the rest are "extras"
   const activeItems = items.filter((i) => i.active);
-  const [mainItem, ...extraItems] = activeItems;
 
   const shiftEntries = entries.filter((e) => e.date === date && e.shift === shift);
   const shiftSummary = summarize(shiftEntries);
@@ -39,10 +37,10 @@ export default function Entry({ goTo }) {
   const activePeople = people.filter((p) => p.active);
   const visible = activePeople.filter((p) => p.name.toLowerCase().includes(term));
 
-  if (!mainItem) {
+  if (activeItems.length === 0) {
     return (
       <div className="card empty">
-        <p>No items yet. Add tea, coffee, snacks etc. first.</p>
+        <p>No items yet. Add tea, coffee, juice, snacks etc. first.</p>
         <button className="btn primary" onClick={() => goTo("items")}>
           Add items
         </button>
@@ -90,45 +88,27 @@ export default function Entry({ goTo }) {
         <>
           <input className="search" placeholder="🔍 Search customer…" value={search} onChange={(e) => setSearch(e.target.value)} />
           <div className="card list">
-            <div className="list-columns muted small">
-              <span>Customer</span>
-              <span>{mainItem.name}</span>
-            </div>
             {visible.map((p) => {
               const ps = summarize(shiftEntries.filter((e) => e.personId === p.id));
-              const extraCount = extraItems.reduce((sum, i) => sum + qtyFor(p.id, i.id), 0);
               const open = openId === p.id;
               return (
                 <div key={p.id} className={`customer${ps.qty ? " has" : ""}${open ? " open" : ""}`}>
-                  <div className="row">
-                    <div className="who">
+                  <button className="row customer-toggle" aria-expanded={open} onClick={() => setOpenId(open ? null : p.id)}>
+                    <span className="who">
                       <span className="name">{p.name}</span>
-                      {ps.qty > 0 && (
-                        <span className="muted small">
-                          {itemsText(ps, itemName)} · {rupees(ps.amount)}
-                        </span>
-                      )}
-                    </div>
-                    <div className="row-actions">
-                      <button
-                        className={extraCount ? "btn extra-btn filled" : "btn extra-btn"}
-                        aria-expanded={open}
-                        onClick={() => setOpenId(open ? null : p.id)}
-                      >
-                        {open ? "Done" : extraCount ? `Extra (${extraCount})` : "+ Extra"}
-                      </button>
-                      <Counter
-                        qty={qtyFor(p.id, mainItem.id)}
-                        label={`${mainItem.name} for ${p.name}`}
-                        onChange={(qty) => setQty(date, shift, p.id, mainItem.id, qty)}
-                      />
-                    </div>
-                  </div>
+                      <span className="muted small">
+                        {ps.qty > 0 ? `${itemsText(ps, itemName)} · ${rupees(ps.amount)}` : "Nothing yet"}
+                      </span>
+                    </span>
+                    <span className={ps.qty ? "btn extra-btn filled" : "btn extra-btn"}>
+                      {open ? "Done ✓" : ps.qty ? `${ps.qty} · Edit` : "+ Add"}
+                    </span>
+                  </button>
 
                   {open && (
                     <div className="extras">
-                      {extraItems.map((i) => (
-                        <div key={i.id} className="extra-row">
+                      {activeItems.map((i) => (
+                        <div key={i.id} className={qtyFor(p.id, i.id) ? "extra-row picked" : "extra-row"}>
                           <span>
                             {i.name} <span className="muted small">{rupees(i.price)}</span>
                           </span>
@@ -139,14 +119,6 @@ export default function Entry({ goTo }) {
                           />
                         </div>
                       ))}
-                      {extraItems.length === 0 && (
-                        <p className="muted small">
-                          No extra items yet.{" "}
-                          <button className="link" onClick={() => goTo("items")}>
-                            Add coffee, biscuit, samosa…
-                          </button>
-                        </p>
-                      )}
                     </div>
                   )}
                 </div>
@@ -158,7 +130,7 @@ export default function Entry({ goTo }) {
             + Add customer
           </button>
           <p className="muted small center">
-            Tap + for {mainItem.name}. Tap “+ Extra” to add other items for that customer. Entries save automatically.
+            Tap a customer, then tap + on what they took (tea, coffee, juice…). Entries save automatically.
           </p>
         </>
       )}

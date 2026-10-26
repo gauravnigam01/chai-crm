@@ -197,3 +197,12 @@ textarea:focus { outline: 2px solid var(--chai-soft); border-color: var(--chai);
   body, .app, .content { background: #fff; padding: 0; }
   .card { border: none; }
 }
+
+/* ---------- entry: tap a customer to pick items ---------- */
+.customer-toggle {
+  width: 100%; font: inherit; color: inherit; text-align: left; cursor: pointer;
+  background: none; border: none;
+}
+.customer-toggle .extra-btn { flex-shrink: 0; pointer-events: none; }
+.extras { padding-left: 1rem; }
+.extra-row.picked { border-color: var(--chai); }
