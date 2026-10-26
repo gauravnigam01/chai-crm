@@ -206,3 +206,18 @@ textarea:focus { outline: 2px solid var(--chai-soft); border-color: var(--chai);
 .customer-toggle .extra-btn { flex-shrink: 0; pointer-events: none; }
 .extras { padding-left: 1rem; }
 .extra-row.picked { border-color: var(--chai); }
+
+/* ---------- entry: typed-in extra item ---------- */
+.custom-add {
+  border: 1px dashed var(--chai); border-radius: 12px; padding: 0.6rem 0.7rem; background: #fff;
+  display: flex; flex-direction: column; gap: 0.45rem;
+}
+.custom-title { font-weight: 700; color: var(--chai); }
+.custom-fields { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.custom-fields .c-name { flex: 2 1 140px; }
+.custom-fields .c-qty { flex: 0 1 70px; }
+.custom-fields .c-amount { flex: 1 1 90px; }
+.icon-btn {
+  width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: #fff;
+  color: var(--red); cursor: pointer; font-size: 0.85rem;
+}

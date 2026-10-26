@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { groupBy, rupees, summarize, useStore } from "../store.jsx";
+import { groupBy, isCustomKey, rupees, summarize, useStore } from "../store.jsx";
 import RangePicker, { defaultRange } from "../components/RangePicker.jsx";
 
 export default function Bills({ openBill }) {
@@ -18,6 +18,10 @@ export default function Bills({ openBill }) {
 
   // Only show columns for items sold in this period, in the Items-page order
   const itemColumns = items.filter((i) => grand.byItem.has(i.id));
+  // Typed-in one-off items vary too much for their own columns; show their total amount instead
+  const otherAmount = (summary) =>
+    [...summary.byItem.entries()].reduce((sum, [key, t]) => (isCustomKey(key) ? sum + t.amount : sum), 0);
+  const showOther = otherAmount(grand) > 0;
 
   return (
     <>
@@ -48,6 +52,7 @@ export default function Bills({ openBill }) {
                   {i.name}
                 </th>
               ))}
+              {showOther && <th className="num">Other</th>}
               <th className="num">Bill</th>
               <th />
             </tr>
@@ -61,6 +66,7 @@ export default function Bills({ openBill }) {
                     {r.byItem.get(i.id)?.qty || "–"}
                   </td>
                 ))}
+                {showOther && <td className="num">{otherAmount(r) ? rupees(otherAmount(r)) : "–"}</td>}
                 <td className="num">
                   <strong>{rupees(r.amount)}</strong>
                 </td>
@@ -71,7 +77,7 @@ export default function Bills({ openBill }) {
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={itemColumns.length + 3} className="muted">
+                <td colSpan={itemColumns.length + (showOther ? 4 : 3)} className="muted">
                   Nothing recorded in this period.
                 </td>
               </tr>
@@ -86,6 +92,7 @@ export default function Bills({ openBill }) {
                     {grand.byItem.get(i.id).qty}
                   </td>
                 ))}
+                {showOther && <td className="num">{rupees(otherAmount(grand))}</td>}
                 <td className="num">{rupees(grand.amount)}</td>
                 <td />
               </tr>

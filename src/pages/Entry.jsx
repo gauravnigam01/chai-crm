@@ -16,8 +16,62 @@ function Counter({ qty, label, onChange }) {
   );
 }
 
+// Type in anything not in the Items list: name, how many, and the total amount
+function CustomAdd({ onAdd }) {
+  const [name, setName] = useState("");
+  const [qty, setQty] = useState("1");
+  const [amount, setAmount] = useState("");
+  const [error, setError] = useState("");
+
+  function submit(e) {
+    e.preventDefault();
+    const q = Number.parseInt(qty, 10);
+    const a = Number(amount);
+    if (!name.trim()) return setError("Enter what they took.");
+    if (!(q > 0)) return setError("Quantity should be 1 or more.");
+    if (!(a > 0)) return setError("Enter the total amount in ₹.");
+    onAdd(name, q, a);
+    setName("");
+    setQty("1");
+    setAmount("");
+    setError("");
+  }
+
+  return (
+    <form className="custom-add" onSubmit={submit}>
+      <span className="small custom-title">Something else?</span>
+      <div className="custom-fields">
+        <input className="c-name" placeholder="Item (e.g. Biscuit)" value={name} onChange={(e) => setName(e.target.value)} />
+        <input
+          className="c-qty"
+          type="number"
+          min="1"
+          inputMode="numeric"
+          aria-label="Quantity"
+          placeholder="Qty"
+          value={qty}
+          onChange={(e) => setQty(e.target.value)}
+        />
+        <input
+          className="c-amount"
+          type="number"
+          min="0"
+          step="0.5"
+          inputMode="decimal"
+          aria-label="Total amount in rupees"
+          placeholder="₹ Total"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+        />
+        <button className="btn primary">Add</button>
+      </div>
+      {error && <p className="error small">{error}</p>}
+    </form>
+  );
+}
+
 export default function Entry({ goTo }) {
-  const { people, items, entries, setQty, itemName } = useStore();
+  const { people, items, entries, setQty, addCustom, removeEntry, itemName } = useStore();
   const [date, setDate] = useState(today);
   const [shift, setShift] = useState(currentShift);
   const [openId, setOpenId] = useState(null); // customer whose items are shown
@@ -119,6 +173,22 @@ export default function Entry({ goTo }) {
                           />
                         </div>
                       ))}
+                      {shiftEntries
+                        .filter((e) => e.personId === p.id && !e.itemId)
+                        .map((e) => (
+                          <div key={e.id} className="extra-row picked">
+                            <span>
+                              {e.name} × {e.qty}
+                            </span>
+                            <span className="row-actions">
+                              <strong>{rupees(e.amount)}</strong>
+                              <button className="icon-btn" aria-label={`Remove ${e.name}`} onClick={() => removeEntry(e.id)}>
+                                ✕
+                              </button>
+                            </span>
+                          </div>
+                        ))}
+                      <CustomAdd onAdd={(name, qty, amount) => addCustom(date, shift, p.id, name, qty, amount)} />
                     </div>
                   )}
                 </div>

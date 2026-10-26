@@ -17,6 +17,7 @@ const EMPTY_DATA = {
   // { id, name, phone, address, active }
   people: [],
   // { id, date: "YYYY-MM-DD", shift, personId, itemId, qty, price }
+  // or a one-off typed-in item: { id, date, shift, personId, itemId: null, name, qty, amount }
   // price is stored per entry so changing an item's price never changes old bills
   entries: [],
 };
@@ -100,6 +101,18 @@ export function StoreProvider({ children }) {
       });
     },
 
+    // A one-off item typed in on the spot (not in the Items list), with its total amount
+    addCustom(date, shift, personId, name, qty, amount) {
+      setData((d) => ({
+        ...d,
+        entries: [...d.entries, { id: newId(), date, shift, personId, itemId: null, name: name.trim(), qty, amount }],
+      }));
+    },
+
+    removeEntry(id) {
+      setData((d) => ({ ...d, entries: d.entries.filter((e) => e.id !== id) }));
+    },
+
     replaceAll(newData) {
       setData({ ...EMPTY_DATA, ...newData });
     },
@@ -108,7 +121,8 @@ export function StoreProvider({ children }) {
   const value = {
     ...data,
     ...actions,
-    itemName: (id) => data.items.find((i) => i.id === id)?.name || "Item",
+    itemName: (key) =>
+      isCustomKey(key) ? key.slice(CUSTOM_PREFIX.length) : data.items.find((i) => i.id === key)?.name || "Item",
   };
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
@@ -124,8 +138,23 @@ function emptyTotals() {
   return { qty: 0, amount: 0, morning: 0, afternoon: 0, evening: 0 };
 }
 
+// Custom (typed-in) entries are grouped by name under this key prefix
+const CUSTOM_PREFIX = "custom:";
+
+export function isCustomKey(key) {
+  return typeof key === "string" && key.startsWith(CUSTOM_PREFIX);
+}
+
+function itemKey(e) {
+  return e.itemId || CUSTOM_PREFIX + e.name;
+}
+
+export function entryAmount(e) {
+  return e.amount ?? e.qty * e.price;
+}
+
 function add(totals, e) {
-  const amount = e.qty * e.price;
+  const amount = entryAmount(e);
   totals.qty += e.qty;
   totals.amount += amount;
   totals[e.shift] += amount;
@@ -137,8 +166,9 @@ export function summarize(entries) {
   const byItem = new Map();
   for (const e of entries) {
     add(total, e);
-    if (!byItem.has(e.itemId)) byItem.set(e.itemId, { ...emptyTotals(), qtyByShift: { morning: 0, afternoon: 0, evening: 0 } });
-    const item = byItem.get(e.itemId);
+    const key = itemKey(e);
+    if (!byItem.has(key)) byItem.set(key, { ...emptyTotals(), qtyByShift: { morning: 0, afternoon: 0, evening: 0 } });
+    const item = byItem.get(key);
     add(item, e);
     item.qtyByShift[e.shift] += e.qty;
   }
