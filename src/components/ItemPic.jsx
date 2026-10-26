@@ -1,4 +1,4 @@
-import { ITEM_ICONS, guessIcon } from "../store.jsx";
+import { ITEM_ICONS } from "../store.jsx";
 
 // Small round picture for an item
 export default function ItemPic({ icon, size = "md" }) {
@@ -9,31 +9,21 @@ export default function ItemPic({ icon, size = "md" }) {
   );
 }
 
-// Choose a picture; null means "auto" (guessed from the item name)
-export function IconPicker({ value, name, onChange }) {
+// Choose a picture; tapping the chosen one again clears it (picture is then guessed from the name)
+export function IconPicker({ value, onChange }) {
   return (
     <div className="icon-picker" role="radiogroup" aria-label="Item picture">
-      <button
-        type="button"
-        role="radio"
-        aria-checked={!value}
-        className={!value ? "icon-choice auto active" : "icon-choice auto"}
-        onClick={() => onChange(null)}
-        title="Pick automatically from the name"
-      >
-        {guessIcon(name)}
-        <span>Auto</span>
-      </button>
-      {ITEM_ICONS.map((icon) => (
+      {ITEM_ICONS.map(({ icon, label }) => (
         <button
           type="button"
           role="radio"
           aria-checked={value === icon}
           key={icon}
           className={value === icon ? "icon-choice active" : "icon-choice"}
-          onClick={() => onChange(icon)}
+          onClick={() => onChange(value === icon ? null : icon)}
         >
-          {icon}
+          <span className="icon-emoji">{icon}</span>
+          <span className="icon-label">{label}</span>
         </button>
       ))}
     </div>

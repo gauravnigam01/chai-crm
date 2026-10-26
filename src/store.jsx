@@ -13,8 +13,9 @@ const DEFAULT_ITEMS = [{ id: "tea", name: "Tea", price: 10, active: true }];
 
 // Small pictures for items; picked in the Items page or guessed from the name
 export const ITEM_ICONS = [
-  "🍵", "☕", "🧃", "🍋", "🥛", "💧", "🥤", "🍪", "🥟", "🥪", "🍰",
-  "🍞", "🍜", "🧆", "🥚", "🍟", "🫓", "🍛", "🍦", "🍌", "🍎", "🍽️",
+  { icon: "🍵", label: "Tea" },
+  { icon: "☕", label: "Coffee" },
+  { icon: "🧃", label: "Juice" },
 ];
 
 const ICON_GUESSES = [

@@ -292,13 +292,13 @@ textarea:focus { outline: 2px solid var(--chai-soft); border-color: var(--chai);
 .item-name, .item-cell { display: inline-flex; align-items: center; gap: 0.6rem; }
 .item-cell { gap: 0.45rem; }
 .field-label { font-weight: 600; margin-bottom: -0.3rem; }
-.icon-picker { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.icon-picker { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .icon-choice {
-  width: 42px; height: 42px; border-radius: 10px; border: 1px solid var(--line); background: #fff;
-  font-size: 1.3rem; cursor: pointer; display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+  min-width: 84px; padding: 0.55rem 0.7rem; border-radius: 12px; border: 1px solid var(--line); background: #fff;
+  cursor: pointer; display: inline-flex; flex-direction: column; align-items: center; gap: 0.2rem; font: inherit;
 }
-.icon-choice.auto { width: auto; padding: 0 0.6rem; flex-direction: row; gap: 0.3rem; font-size: 1.1rem; }
-.icon-choice.auto span { font-size: 0.78rem; font-weight: 600; }
+.icon-emoji { font-size: 1.6rem; line-height: 1; }
+.icon-label { font-size: 0.8rem; font-weight: 600; color: var(--ink); }
 .icon-choice.active { border-color: var(--chai); background: var(--chai-soft); box-shadow: 0 0 0 2px var(--chai) inset; }
 .row.edit .icon-picker { flex-basis: 100%; }
 .who.grow { flex: 1; }

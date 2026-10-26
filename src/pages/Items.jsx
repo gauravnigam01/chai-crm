@@ -49,8 +49,8 @@ export default function Items() {
             onChange={(e) => setPrice(e.target.value)}
           />
         </div>
-        <span className="small field-label">Picture</span>
-        <IconPicker value={icon} name={name} onChange={setIcon} />
+        <span className="small field-label">Picture (optional)</span>
+        <IconPicker value={icon} onChange={setIcon} />
         {error && <p className="error small">{error}</p>}
         <button className="btn primary">Add item</button>
       </form>
@@ -144,7 +144,7 @@ function EditItem({ item, onSave, onCancel }) {
     >
       <input autoFocus value={name} onChange={(e) => setName(e.target.value)} />
       <input className="price-input" type="number" min="0.5" step="0.5" value={price} onChange={(e) => setPrice(e.target.value)} />
-      <IconPicker value={icon} name={name} onChange={setIcon} />
+      <IconPicker value={icon} onChange={setIcon} />
       <div className="row-actions">
         <button className="btn primary small-btn" disabled={!valid}>
           Save
