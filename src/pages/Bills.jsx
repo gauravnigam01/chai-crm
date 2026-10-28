@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { accountOf, groupBy, iconOf, isCustomKey, rupees, summarize, useStore } from "../store.jsx";
+import { accountOf, groupBy, iconOf, isCustomKey, itemsText, rupees, summarize, useStore } from "../store.jsx";
 import RangePicker, { defaultRange } from "../components/RangePicker.jsx";
 import Balance from "../components/Balance.jsx";
 
 export default function Bills({ openBill }) {
-  const { people, items, entries, payments } = useStore();
+  const { people, items, entries, payments, itemLabel } = useStore();
   // Money still to collect from everyone, all time (advances don't reduce other people's dues)
   const toCollect = people.reduce((sum, p) => sum + Math.max(0, accountOf(p.id, entries, payments).balance), 0);
   const [range, setRange] = useState(defaultRange);
@@ -51,7 +51,35 @@ export default function Bills({ openBill }) {
         </div>
       </div>
 
-      <div className="card table-wrap">
+      {/* Phones: one simple card per customer */}
+      <div className="bill-cards phone-only">
+        {rows.map((r) => (
+          <button key={r.person.id} className="card bill-card" onClick={() => openBill(r.person.id, range)}>
+            <span className="bc-top">
+              <span className="avatar">{r.person.name.trim().charAt(0).toUpperCase()}</span>
+              <span className="who">
+                <strong>{r.person.name}</strong>
+                <span className="muted small">{r.qty ? itemsText(r, itemLabel) : "No items"}</span>
+              </span>
+              <span className="muted">›</span>
+            </span>
+            <span className="bc-nums">
+              <span>
+                <span className="muted small">Bill</span>
+                <strong>{rupees(r.amount)}</strong>
+              </span>
+              <span>
+                <span className="muted small">Received</span>
+                <strong>{rupees(r.received)}</strong>
+              </span>
+              <Balance balance={accountOf(r.person.id, entries, payments).balance} />
+            </span>
+          </button>
+        ))}
+        {rows.length === 0 && <p className="card muted center">Nothing recorded in this period.</p>}
+      </div>
+
+      <div className="card table-wrap desktop-only">
         <table className="table">
           <thead>
             <tr>
@@ -117,7 +145,7 @@ export default function Bills({ openBill }) {
           )}
         </table>
       </div>
-      {rows.length > 0 && <p className="muted small center">Tap a customer to open their own bill.</p>}
+      {rows.length > 0 && <p className="muted small center">Tap a customer to open their full bill and send it on WhatsApp.</p>}
     </>
   );
 }
